@@ -34,7 +34,7 @@ export async function sendEmail({ to, subject, body }: SendEmailParams): Promise
         })
 
         await transporter.sendMail({
-            from: process.env.EMAIL_FROM || 'LMS AI <academy@sitamoto.ai>',
+            from: process.env.EMAIL_FROM || 'LMS AI <academy@tandeem.ai>',
             to,
             subject,
             html: body,

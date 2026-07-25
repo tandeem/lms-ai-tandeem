@@ -34,7 +34,7 @@ export function TopNav({ user }: TopNavProps) {
             <GraduationCap className="h-4 w-4 text-white" />
           </div>
           <span className="text-lg font-bold">
-            Sitamoto <span className="text-blue-600">Academy</span>
+            Tandeem <span className="text-blue-600">Academy</span>
           </span>
         </Link>
 

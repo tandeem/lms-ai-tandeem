@@ -1,0 +1,223 @@
+import { Metadata } from 'next'
+import Link from 'next/link'
+import Image from 'next/image'
+import { BookOpen, Users, Award, CalendarDays, MapPin, Route, GraduationCap, ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { db } from '@/lib/db'
+import { getPublishedCourses } from '@/lib/actions/courses'
+import { getPublishedTrainings } from '@/lib/actions/trainings'
+import { getPublishedLearningPaths } from '@/lib/actions/learning-paths'
+import { PriceDisplay } from '@/components/shared/price-display'
+import { CourseCarousel } from '@/components/landing/course-carousel'
+import { LandingNavbar } from '@/components/landing/landing-navbar'
+import { LandingFooter } from '@/components/landing/landing-footer'
+
+export const metadata: Metadata = {
+  title: 'Demo — Tandeem Academy',
+  description: 'Pratinjau kursus dan pelatihan di Tandeem Academy.',
+}
+
+export default async function DemoPage() {
+  const [courses, trainings, learningPaths, stats] = await Promise.all([
+    getPublishedCourses(12),
+    getPublishedTrainings(6),
+    getPublishedLearningPaths(6),
+    db.$queryRaw<
+      Array<{ courseCount: bigint; enrollmentCount: bigint; userCount: bigint }>
+    >`
+      SELECT
+        (SELECT COUNT(*) FROM courses WHERE status = 'PUBLISHED') AS "courseCount",
+        (SELECT COUNT(*) FROM enrollments) AS "enrollmentCount",
+        (SELECT COUNT(*) FROM users) AS "userCount"
+    `.then((rows) => ({
+      courseCount: Number(rows[0]?.courseCount ?? 0),
+      enrollmentCount: Number(rows[0]?.enrollmentCount ?? 0),
+      userCount: Number(rows[0]?.userCount ?? 0),
+    })),
+  ])
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <LandingNavbar />
+
+      {/* Hero mini */}
+      <section className="border-b bg-slate-50/50 dark:bg-slate-900/20">
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+          <h2 className="text-2xl font-bold sm:text-3xl">
+            Contoh Kursus, Pelatihan & Learning Path
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Pratinjau konsep platform Tandeem Academy. Konten nyata dari tenant demo.
+          </p>
+        </div>
+      </section>
+
+      {/* Stats bar */}
+      <section className="border-y bg-background">
+        <div className="mx-auto grid max-w-4xl grid-cols-3 gap-6 px-4 py-10 sm:py-12">
+          <div className="text-center transition-transform duration-300 hover:scale-105">
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
+                <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{stats.courseCount}</span>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">Kursus Tersedia</p>
+          </div>
+          <div className="text-center transition-transform duration-300 hover:scale-105">
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+                <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <span className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{stats.enrollmentCount}</span>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">Total Enrollment</p>
+          </div>
+          <div className="text-center transition-transform duration-300 hover:scale-105">
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
+                <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <span className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{stats.userCount}</span>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">Pengguna Aktif</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Courses Carousel */}
+      <CourseCarousel courses={courses} />
+
+      {/* Public Trainings */}
+      {trainings.length > 0 && (
+        <section className="py-16 bg-slate-50/50 dark:bg-slate-900/20">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="text-2xl font-bold sm:text-3xl">Pelatihan Tersedia</h2>
+            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+              Workshop, seminar, dan bootcamp yang bisa Anda ikuti
+            </p>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {trainings.map((t) => (
+                <div
+                  key={t.id}
+                  className="group flex flex-col rounded-xl border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold line-clamp-2 transition-colors duration-200 group-hover:text-primary">{t.title}</h3>
+                    <Badge variant="outline" className="shrink-0 text-xs">{t.type}</Badge>
+                  </div>
+                  {t.description && (
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                  )}
+                  <div className="mt-auto flex flex-col gap-2 pt-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {new Date(t.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                    {t.location && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {t.location}
+                      </div>
+                    )}
+                    {t.price != null && (
+                      <div className="pt-2 border-t">
+                        <PriceDisplay price={Number(t.price)} promoPrice={t.promoPrice ? Number(t.promoPrice) : null} size="sm" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Public Learning Paths */}
+      {learningPaths.length > 0 && (
+        <section className="py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="text-2xl font-bold sm:text-3xl">Jalur Pembelajaran</h2>
+            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+              Kumpulan kursus terstruktur untuk penguasaan mendalam
+            </p>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {learningPaths.map((lp) => (
+                <div
+                  key={lp.id}
+                  className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                >
+                  {lp.thumbnail ? (
+                    <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950">
+                      <Image
+                        src={lp.thumbnail}
+                        alt={lp.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950">
+                      <Route className="h-10 w-10 text-indigo-300 transition-transform duration-300 group-hover:scale-110 dark:text-indigo-700" />
+                    </div>
+                  )}
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="font-semibold line-clamp-2 transition-colors duration-200 group-hover:text-primary">{lp.title}</h3>
+                    {lp.description && (
+                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{lp.description}</p>
+                    )}
+                    <div className="mt-auto flex items-center gap-3 pt-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="h-3 w-3" />
+                        {lp._count.courses} kursus
+                      </span>
+                      {lp._count.enrollments > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {lp._count.enrollments} peserta
+                        </span>
+                      )}
+                    </div>
+                    {lp.price != null && (
+                      <div className="mt-2 pt-2 border-t">
+                        <PriceDisplay price={Number(lp.price)} promoPrice={lp.promoPrice ? Number(lp.promoPrice) : null} size="sm" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA */}
+      <section className="py-16">
+        <div className="mx-auto max-w-3xl px-4 text-center">
+          <h2 className="text-2xl font-bold sm:text-3xl">Punya Minat pada Platform Ini?</h2>
+          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+            Masuk untuk mulai belajar, atau kembali ke beranda untuk mempelajari platform kami.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button size="lg" className="px-8 shadow-lg" asChild>
+              <Link href="/auth/login">
+                <GraduationCap className="h-5 w-5" />
+                Masuk ke Platform
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="px-8" asChild>
+              <Link href="/">
+                <ArrowLeft className="h-5 w-5" />
+                Kembali ke Beranda
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <LandingFooter />
+    </div>
+  )
+}

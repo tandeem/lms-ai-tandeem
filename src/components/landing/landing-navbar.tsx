@@ -36,14 +36,14 @@ export function LandingNavbar() {
                         <GraduationCap className="h-4 w-4 text-white" />
                     </div>
                     <span className="text-lg font-bold">
-                        Sitamoto <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Academy</span>
+                        Tandeem <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Academy</span>
                     </span>
                 </Link>
 
                 {/* Desktop Navigation */}
                 <nav className="hidden items-center gap-6 text-sm md:flex">
                     <Link
-                        href="/#courses"
+                        href="/#how-it-works"
                         className="relative text-muted-foreground transition-colors hover:text-foreground after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all hover:after:w-full"
                     >
                         Kursus
@@ -54,14 +54,12 @@ export function LandingNavbar() {
                     >
                         Fitur
                     </Link>
-                    <a
-                        href="https://sitamoto.ai"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <Link
+                        href="/#contact"
                         className="relative text-muted-foreground transition-colors hover:text-foreground after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all hover:after:w-full"
                     >
-                        Sitamoto.ai
-                    </a>
+                        Kontak
+                    </Link>
                 </nav>
 
                 {/* Desktop Actions */}
@@ -108,7 +106,7 @@ export function LandingNavbar() {
                 <div className="border-t bg-background/95 backdrop-blur-xl md:hidden">
                     <nav className="mx-auto max-w-6xl space-y-1 px-4 py-4">
                         <Link
-                            href="/#courses"
+                            href="/#how-it-works"
                             className="block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             onClick={() => setMobileMenuOpen(false)}
                         >
@@ -121,14 +119,13 @@ export function LandingNavbar() {
                         >
                             Fitur
                         </Link>
-                        <a
-                            href="https://sitamoto.ai"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            href="/#contact"
                             className="block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            onClick={() => setMobileMenuOpen(false)}
                         >
-                            Sitamoto.ai
-                        </a>
+                            Kontak
+                        </Link>
                         <div className="flex gap-2 pt-2">
                             <Button 
                                 variant="outline" 

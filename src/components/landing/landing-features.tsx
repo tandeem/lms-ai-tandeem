@@ -86,7 +86,7 @@ export function LandingFeatures() {
                         Fitur Unggulan
                     </p>
                     <h2 className="mt-2 text-2xl font-bold sm:text-3xl">
-                        Mengapa Sitamoto Academy?
+                        Mengapa Tandeem Academy?
                     </h2>
                     <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
                         Platform yang dirancang untuk mempercepat pengembangan

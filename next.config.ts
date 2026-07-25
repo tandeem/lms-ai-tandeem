@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
       {
         protocol: (process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http') as 'http' | 'https',
         hostname: process.env.MINIO_ENDPOINT || 'localhost',
-        port: process.env.MINIO_PORT || '9000',
+        port: process.env.MINIO_PORT !== undefined ? process.env.MINIO_PORT : '9000',
         pathname: `/${process.env.MINIO_BUCKET || 'lms-media'}/**`,
       },
       {

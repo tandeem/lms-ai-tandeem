@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Sitamoto Academy',
+  title: 'Tandeem Academy',
   description: 'Learning Management System untuk Organisasi',
 }
 

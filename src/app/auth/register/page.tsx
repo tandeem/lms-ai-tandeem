@@ -73,7 +73,7 @@ export default function RegisterPage() {
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
                         <GraduationCap className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <CardTitle className="text-2xl font-bold">Sitamoto Academy</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Tandeem Academy</CardTitle>
                     <CardDescription>
                         Buat Akun Baru
                     </CardDescription>

@@ -29,7 +29,7 @@ export function PortalFooter({
                                 <GraduationCap className="h-4 w-4 text-white" />
                             </div>
                             <span className="text-lg font-bold">
-                                Sitamoto{' '}
+                                Tandeem{' '}
                                 <span className="text-blue-600">Academy</span>
                             </span>
                         </Link>
@@ -120,18 +120,16 @@ export function PortalFooter({
                 {/* Bottom */}
                 <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t pt-6 sm:flex-row">
                     <p className="text-xs text-muted-foreground">
-                        © {year} Sitamoto Academy. All rights reserved.
+                        © {year} Tandeem Academy. All rights reserved.
                     </p>
                     <p className="text-xs text-muted-foreground">
                         Powered by{' '}
-                        <a
-                            href="https://sitamoto.ai"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            href="/"
                             className="font-medium text-blue-600 hover:underline"
                         >
-                            Sitamoto.ai
-                        </a>
+                            Tandeem Studio
+                        </Link>
                     </p>
                 </div>
             </div>

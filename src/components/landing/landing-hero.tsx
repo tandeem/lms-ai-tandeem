@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { GraduationCap, Sparkles, ArrowRight } from 'lucide-react'
+import { Sparkles, ArrowRight, CalendarClock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function LandingHero() {
@@ -47,9 +47,9 @@ export function LandingHero() {
                         transition: 'all 0.8s ease-out 0.2s'
                     }}
                 >
-                    Tingkatkan Skill Tim Anda dengan{' '}
+                    Platform LMS AI untuk{' '}
                     <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
-                        Sitamoto Academy
+                        Tim Modern
                     </span>
                 </h1>
 
@@ -62,9 +62,7 @@ export function LandingHero() {
                         transition: 'all 0.8s ease-out 0.4s'
                     }}
                 >
-                    Platform online course yang dilengkapi AI untuk
-                    mempermudah pembelajaran, tracking progress, dan pengembangan
-                    kompetensi Anda.
+                    Buat, jadwalkan, dan sertifikasi program pelatihan internal — semuanya ditenagai AI. Tandeem Academy menggabungkan kursus self-paced, workshop terjadwal, dan learning path dalam satu platform.
                 </p>
 
                 {/* Animated CTA buttons */}
@@ -81,11 +79,11 @@ export function LandingHero() {
                         className="group gap-2 px-8 text-base shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105" 
                         asChild
                     >
-                        <Link href="/auth/login">
-                            <GraduationCap className="h-5 w-5 transition-transform group-hover:scale-110" />
-                            Mulai Belajar
+                        <a href="mailto:hello@tandeem.ai?subject=Request%20Demo%20Tandeem%20Academy">
+                            <CalendarClock className="h-5 w-5 transition-transform group-hover:scale-110" />
+                            Request Demo
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Link>
+                        </a>
                     </Button>
                     <Button 
                         size="lg" 
@@ -93,7 +91,7 @@ export function LandingHero() {
                         className="px-8 text-base transition-all duration-300 hover:bg-accent hover:scale-105" 
                         asChild
                     >
-                        <Link href="#courses">Jelajahi Kursus</Link>
+                        <Link href="/demo">Lihat Contoh Kursus</Link>
                     </Button>
                 </div>
 

@@ -13,7 +13,7 @@ export function LandingFooter() {
                                 <GraduationCap className="h-4 w-4 text-white" />
                             </div>
                             <span className="text-lg font-bold">
-                                Sitamoto{' '}
+                                Tandeem{' '}
                                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Academy</span>
                             </span>
                         </Link>
@@ -67,21 +67,17 @@ export function LandingFooter() {
                         <h4 className="text-sm font-semibold">Perusahaan</h4>
                         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                             <li>
-                                <a
-                                    href="https://sitamoto.ai"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                <Link
+                                    href="/#contact"
                                     className="inline-flex items-center gap-1.5 transition-all duration-200 hover:text-foreground hover:translate-x-1"
                                 >
                                     <Globe className="h-3.5 w-3.5" />
-                                    Sitamoto.ai
-                                </a>
+                                    Kontak
+                                </Link>
                             </li>
                             <li>
                                 <a
-                                    href="https://sitamoto.ai/en#contact-us"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href="mailto:hello@tandeem.ai?subject=Request%20Demo%20Tandeem%20Academy"
                                     className="inline-flex items-center gap-1.5 transition-all duration-200 hover:text-foreground hover:translate-x-1"
                                 >
                                     <Mail className="h-3.5 w-3.5" />
@@ -126,18 +122,16 @@ export function LandingFooter() {
                 {/* Bottom */}
                 <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t pt-6 text-center sm:flex-row sm:text-left">
                     <p className="text-xs text-muted-foreground">
-                        © {new Date().getFullYear()} Sitamoto Academy. All rights reserved.
+                        © {new Date().getFullYear()} Tandeem Academy. All rights reserved.
                     </p>
                     <p className="text-xs text-muted-foreground">
                         Powered by{' '}
-                        <a
-                            href="https://sitamoto.ai"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            href="/#contact"
                             className="font-medium text-blue-600 transition-colors hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                         >
-                            Sitamoto.ai
-                        </a>
+                            Tandeem Studio
+                        </Link>
                     </p>
                 </div>
             </div>
