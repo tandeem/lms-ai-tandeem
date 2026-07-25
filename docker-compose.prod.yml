@@ -1,6 +1,9 @@
 # ============================================
 # Docker Compose - Production
-# LMS AI (Next.js standalone) + Redis + RustFS
+# LMS AI (Next.js standalone) + RustFS
+# Redis: pakai instance existing di VPS (network redis_default)
+# Reverse proxy: Nginx yang sudah berjalan di host (bukan container) —
+# container publish port ke 127.0.0.1, lalu Nginx yang proxy ke situ.
 # ============================================
 
 services:
@@ -13,8 +16,10 @@ services:
     restart: unless-stopped
     networks:
       - default
-      - proxy
-      - database
+      - postgresql_default
+      - redis_default
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
     extra_hosts:
       - "${RUSTFS_DOMAIN}:host-gateway"
     environment:
@@ -29,15 +34,15 @@ services:
       - APP_URL=${NEXTAUTH_URL}
       # Encryption (AI provider API keys)
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      # Object Storage (RustFS, S3-compatible — diakses via public domain lewat Caddy)
+      # Object Storage (RustFS, S3-compatible — diakses via public domain lewat Nginx)
       - MINIO_ENDPOINT=${RUSTFS_DOMAIN}
       - MINIO_PORT=
       - MINIO_USE_SSL=false
       - MINIO_ACCESS_KEY=${RUSTFS_ACCESS_KEY}
       - MINIO_SECRET_KEY=${RUSTFS_SECRET_KEY}
       - MINIO_BUCKET=${RUSTFS_BUCKET:-lms-media}
-      # Redis (queue/cache)
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      # Redis (queue/cache) — instance existing di VPS via network redis_default
+      - REDIS_URL=${REDIS_URL}
       # Email (SMTP)
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
@@ -56,12 +61,8 @@ services:
       - BUSINESS_PHONE=${BUSINESS_PHONE}
       - BUSINESS_EMAIL=${BUSINESS_EMAIL}
       - BUSINESS_WHATSAPP=${BUSINESS_WHATSAPP}
-    labels:
-      caddy: http://${CADDY_DOMAIN}
-      caddy.reverse_proxy: "{{upstreams ${APP_PORT:-3000}}}"
-      caddy.reverse_proxy.header_up: "X-Forwarded-Proto https"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${APP_PORT:-3000}/api/health"]
+      test: [ "CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -75,27 +76,8 @@ services:
       - no-new-privileges:true
 
   # ------------------------------------------
-  # Redis (untuk future BullMQ queue/cache)
-  # ------------------------------------------
-  redis:
-    image: redis:7-alpine
-    container_name: ${CONTAINER_NAME}-redis
-    restart: unless-stopped
-    networks:
-      - default
-    volumes:
-      - redis_data:/data
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    security_opt:
-      - no-new-privileges:true
-
-  # ------------------------------------------
   # RustFS (S3-compatible object storage)
-  # S3 API (9000) di-proxy Caddy via RUSTFS_DOMAIN
+  # S3 API (9000) di-proxy Nginx (host) via RUSTFS_DOMAIN
   # ------------------------------------------
   rustfs:
     image: rustfs/rustfs:latest
@@ -103,7 +85,8 @@ services:
     restart: unless-stopped
     networks:
       - default
-      - proxy
+    ports:
+      - "127.0.0.1:9000:9000"
     environment:
       - RUSTFS_VOLUMES=/data
       - RUSTFS_ADDRESS=:9000
@@ -115,12 +98,8 @@ services:
       - RUSTFS_OBS_LOGGER_LEVEL=info
     volumes:
       - rustfs_data:/data
-    labels:
-      caddy: http://${RUSTFS_DOMAIN}
-      caddy.reverse_proxy: "{{upstreams 9000}}"
-      caddy.reverse_proxy.header_up: "X-Forwarded-Proto https"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/health"]
+      test: [ "CMD-SHELL", "curl -fsS http://127.0.0.1:9000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -148,7 +127,7 @@ services:
       - AWS_ACCESS_KEY_ID=${RUSTFS_ACCESS_KEY}
       - AWS_SECRET_ACCESS_KEY=${RUSTFS_SECRET_KEY}
       - AWS_DEFAULT_REGION=us-east-1
-    entrypoint: ["/bin/sh"]
+    entrypoint: [ "/bin/sh" ]
     command:
       - -c
       - |
@@ -170,11 +149,10 @@ services:
 networks:
   default:
     driver: bridge
-  proxy:
+  postgresql_default:
     external: true
-  database:
+  redis_default:
     external: true
 
 volumes:
-  redis_data:
   rustfs_data:

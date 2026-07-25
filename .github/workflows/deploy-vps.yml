@@ -1,0 +1,110 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - development
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ============================================
+  # BUILD & PUSH (build image, push ke GHCR)
+  # ============================================
+  build:
+    runs-on: ubuntu-latest
+    environment: development
+    outputs:
+      image: ${{ steps.image.outputs.name }}
+      tag: ${{ steps.image.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute image name & tag
+        id: image
+        run: |
+          IMAGE_NAME="${REGISTRY}/${{ github.repository }}"
+          echo "name=${IMAGE_NAME,,}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
+            ${{ steps.image.outputs.name }}:latest
+          build-args: |
+            MINIO_ENDPOINT=${{ vars.RUSTFS_DOMAIN }}
+            MINIO_PORT=${{ vars.MINIO_PORT }}
+            MINIO_USE_SSL=${{ vars.MINIO_USE_SSL }}
+            MINIO_BUCKET=${{ vars.MINIO_BUCKET }}
+            RUSTFS_DOMAIN=${{ vars.RUSTFS_DOMAIN }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # DEPLOY (copy compose file ke VPS, pull & start container via SSH)
+  # ============================================
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.prod.yml to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          source: "docker-compose.prod.yml"
+          target: ${{ vars.APP_PATH }}
+          strip_components: 0
+
+      - name: SSH deploy (login GHCR with PAT, pull & start container)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          envs: IMAGE_TAG
+          script: |
+            set -e
+            cd "${{ vars.APP_PATH }}"
+
+            echo "${{ secrets.GHCR_PAT }}" | docker login ${{ env.REGISTRY }} -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
+            docker image prune -f
+
+            echo "Waiting for app to become healthy on port ${{ vars.APP_PORT }}..."
+            sleep 5
+            curl -fsS "http://127.0.0.1:${{ vars.APP_PORT }}/api/health" || echo "Healthcheck warning: endpoint not reachable yet"
+
+            echo "Deploy finished at $(date)"
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.tag }}
